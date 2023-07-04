@@ -1,8 +1,16 @@
 class MapArchive(val mapArchive: MutableMap<String, MapNotes>) {
 
     fun makeArchive() {
-        print("Введите название архива: ")
-        val keyArchive = readLine() ?: ""
+        var keyArchive: String?
+
+        do {
+            print("Введите название архива: ")
+            keyArchive = readLine()?.trim()
+            if (keyArchive == null || keyArchive.isEmpty()) {
+                println("Некорректный ввод. Название архива не может быть пустым.")
+                println(" ")
+            }
+        } while (keyArchive == null || keyArchive.isEmpty())
 
         addMapNoteToArchive(keyArchive)
         println("Архив создан\n")

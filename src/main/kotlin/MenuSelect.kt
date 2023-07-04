@@ -1,23 +1,17 @@
 class MenuSelect {
-    companion object {
-        const val ARCHIVE_CREATED = "archiveCreated"
-        const val NOTE_CREATED = "noteCreated"
-        const val EXIT_APP = "exitApp"
-        const val EXIT_MENU = "exitMenu"
-    }
 
-    fun makeMenu(level: MenuLevel, mapArchive: MapArchive, keyForMap: String = ""): Any? {
+    fun makeMenu(level: MenuLevel, mapArchive: MapArchive, keyForMap: String = ""): MenuKey? {
         println("Меню ${level.levelName}")
         println("Введите число, соответствующее пункту меню: ")
 
         return when (level) {
             MenuLevel.ArchiveMenu -> processMenu(level, mapArchive)
             MenuLevel.NoteMenu -> processMenu(level, mapArchive, keyForMap)
-            else -> 0
+            else -> null
         }
     }
 
-    private fun processMenu(level: MenuLevel, mapArchive: MapArchive, keyForMap: String = ""): Any? {
+    private fun processMenu(level: MenuLevel, mapArchive: MapArchive, keyForMap: String = ""): MenuKey {
         val menuItems = if (level == MenuLevel.ArchiveMenu) mapArchive.mapArchive.keys.toList() else mapArchive.mapArchive[keyForMap]?.mutableMapNotes?.keys?.toList()
         val numPointsInMenu = menuItems?.size ?: 0
 
@@ -26,17 +20,20 @@ class MenuSelect {
         return when (val pointMenu = readMenu(numPointsInMenu + 1)) {
             0 -> {
                 if (level == MenuLevel.ArchiveMenu) {
-                    mapArchive.makeArchive()
-                    ARCHIVE_CREATED
+                    val key = mapArchive.makeArchive()
+                    MenuKey.ArchiveKey(key.toString())
                 } else {
-                    mapArchive.mapArchive[keyForMap]?.makeNote()
-                    NOTE_CREATED
+                    val key = mapArchive.mapArchive[keyForMap]?.makeNote() ?: ""
+                    MenuKey.NoteKey(key.toString())
                 }
             }
             numPointsInMenu + 1 -> {
-                if (level == MenuLevel.ArchiveMenu) EXIT_APP else EXIT_MENU
+                if (level == MenuLevel.ArchiveMenu) MenuKey.ExitApp else MenuKey.ExitMenu
             }
-            else -> menuItems?.get(pointMenu - 1)
+            else -> {
+                val key = menuItems?.get(pointMenu - 1) ?: ""
+                if (level == MenuLevel.ArchiveMenu) MenuKey.ArchiveKey(key) else MenuKey.NoteKey(key)
+            }
         }
     }
 
